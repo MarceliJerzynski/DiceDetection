@@ -4,9 +4,9 @@ import cv2
 import numpy as np
 from statistics import mean
 
-amount_of_pictures = 14
-header = 'd'
-
+amount_of_pictures = 54
+header = '('
+ender = ')'
 
 def adjust_gamma(image, gamma):
     inv_gamma = 1.0 / gamma
@@ -47,9 +47,9 @@ def main():
         image_name_original = 'Original dices nr ' + str(i + 1)
         cv2.namedWindow(image_name_original, cv2.WINDOW_NORMAL)
         cv2.resizeWindow(image_name_original, 450, 300)
-        cv2.moveWindow(image_name_original, 0, 100)
+        cv2.moveWindow(image_name_original, 0, 0)
 
-        original_image = cv2.imread('src\\' + header + str(i + 1) + '.jpg', cv2.IMREAD_COLOR)
+        original_image = cv2.imread('src\\Photos\\' + header + str(i + 1) + ender + '.jpg', cv2.IMREAD_COLOR)
         gray_image = cv2.cvtColor(original_image, cv2.COLOR_BGR2GRAY)
         blurred_image = cv2.GaussianBlur(gray_image, (15, 15), 0)
         thresh_image = cv2.adaptiveThreshold(blurred_image, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY_INV, 11, 1)
@@ -57,34 +57,33 @@ def main():
         eroded_image = cv2.erode(thresh_image, kernel, iterations=1)
         dilated_image = cv2.dilate(eroded_image, kernel, iterations=4)
         contours, hierarchy = cv2.findContours(dilated_image, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
-        for j in range(len(contours)):
-            area = cv2.contourArea(contours[j])
-            perimeter = cv2.arcLength(contours[j], True)
-            contours[j] = scale_contour(contours[j], 1.15)
-            if perimeter == 0:
-                break
-            circularity = 4 * math.pi * (area / (perimeter * perimeter))
-            if 0.6 < circularity and 1000 < area < 6000:
-                x = []
-                y = []
-                color = []
-                for k in range(len(contours[j])):
-                    x.append(contours[j][k][0][1])
-                    y.append(contours[j][k][0][0])
-                    color.append(int(gray_image[contours[j][k][0][1], contours[j][k][0][0]]))
-                if int(gray_image[mean(x), mean(y)]) < 150 and mean(color) > 100:
-                    print(mean(color))
-                    cv2.drawContours(original_image, contours, j, (0, 0, 255), 7)
-                    if hierarchy[0][j][3] >= 0 > hierarchy[0][j][2]:
-                        cv2.drawContours(original_image, contours, hierarchy[0][j][3], (255, 0, 0), 5)
-                    # potential_dots.append(contours[j])
-        contours2, hierarchy2 = cv2.findContours(dilated_image, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
-        for j in range(len(contours)):
-            area = cv2.contourArea(contours2[j])
-            if area > 6000:
-                cv2.drawContours(gray_image, contours2, j, (255, 0, 0), 5)
-        cv2.imshow(image_name, original_image)
-        cv2.imshow(image_name_original, dilated_image)
+        try:
+            for j in range(len(contours)):
+                area = cv2.contourArea(contours[j])
+                perimeter = cv2.arcLength(contours[j], True)
+                contours[j] = scale_contour(contours[j], 1.15)
+                if perimeter == 0:
+                    break
+                circularity = 4 * math.pi * (area / (perimeter * perimeter))
+                if 0.6 < circularity and 1000 < area < 6000:
+                    x = []
+                    y = []
+                    color = []
+                    for k in range(len(contours[j])):
+                        x.append(contours[j][k][0][1])
+                        y.append(contours[j][k][0][0])
+                        color.append(int(gray_image[contours[j][k][0][1], contours[j][k][0][0]]))
+                    if int(gray_image[mean(x), mean(y)]) < 150 and mean(color) > 100:
+                        cv2.drawContours(original_image, contours, j, (0, 0, 255), 7)
+                        if hierarchy[0][j][3] >= 0:
+                            cv2.drawContours(original_image, contours, hierarchy[0][j][3], (255, 0, 0), 5)
+                        # potential_dots.append(contours[j])
+            cv2.imshow(image_name, original_image)
+            cv2.imshow(image_name_original, thresh_image)
+        except:
+            print("error, something went wrong :/")
+            i = i+1
+            continue
         key = cv2.waitKey(0)
         if key == 27:  # ESCAPE
             sys.exit()
@@ -104,10 +103,14 @@ def main():
         elif key == 113:  # Q
             thresh = thresh - 5
             print('thresh = ', thresh)
-        else:
-            print("A/D - change image ")
-            print("-----------------------")
-            (print("Q/E - change thresh"))
+        elif key == 49: #1
+            print(i, " : Good")
+        elif key == 50: #2
+            print(i, " : I cant see dice contour")
+        elif key == 51: #3
+            print(i, " : I can see to many pips")
+        elif key == 52: #4
+            print(i, " : Bad photo")
 
         cv2.destroyAllWindows()
 

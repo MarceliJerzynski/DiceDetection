@@ -1,0 +1,54 @@
+0  : Bad photo
+1  : Bad photo
+2  : Bad photo
+3  : Bad photo
+4  : Bad photo
+5  : Bad photo
+6  : I cant see dice contour
+7  : I cant see dice contour
+8  : Bad photo
+9  : I cant see dice contour
+10  : I can see to many pips
+11  : I cant see dice contour
+12  : I cant see dice contour
+13  : I cant see dice contour
+14  : I cant see dice contour
+error, something went wrong :/
+16  : I cant see dice contour
+17  : I cant see dice contour
+18  : I cant see dice contour
+19  : I cant see dice contour
+20  : I cant see dice contour
+21  : I cant see dice contour
+22  : Bad photo
+23  : Bad photo
+24  : I cant see dice contour
+25  : Good
+26  : Bad photo
+27  : I cant see dice contour
+28  : Bad photo
+29  : I cant see dice contour
+30  : Bad photo
+31  : I cant see dice contour
+32  : I cant see dice contour
+33  : Bad photo
+34  : Good
+35  : I cant see dice contour
+36  : I cant see dice contour
+37  : I cant see dice contour
+error, something went wrong :/
+39  : I cant see dice contour
+error, something went wrong :/
+41  : Good
+42  : Bad photo
+43  : I cant see dice contour
+44  : Bad photo
+45  : Good
+46  : Bad photo
+47  : Bad photo
+48  : Good
+49  : Bad photo
+50  : Bad photo
+51  : I cant see dice contour
+52  : Bad photo
+53  : Bad photo
