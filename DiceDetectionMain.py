@@ -47,25 +47,36 @@ def main():
     # min_inertia_ratio = 0.5
 
     while True:
-        image_name = 'Dices nr ' + str(i + 1)
+        image_name = 'Original image no ' + str(i + 1)
         cv2.namedWindow(image_name, cv2.WINDOW_NORMAL)
         cv2.resizeWindow(image_name, 900, 600)
         cv2.moveWindow(image_name, 600, 100)
 
-        image_name_original = 'Original dices nr ' + str(i + 1)
-        cv2.namedWindow(image_name_original, cv2.WINDOW_NORMAL)
-        cv2.resizeWindow(image_name_original, 450, 300)
-        cv2.moveWindow(image_name_original, 0, 0)
+        image_name_dots = 'Processed image (dots) no ' + str(i + 1)
+        cv2.namedWindow(image_name_dots, cv2.WINDOW_NORMAL)
+        cv2.resizeWindow(image_name_dots, 450, 300)
+        cv2.moveWindow(image_name_dots, 0, 0)
+
+        image_name_dices = 'Processed image (dices) no ' + str(i + 1)
+        cv2.namedWindow(image_name_dices, cv2.WINDOW_NORMAL)
+        cv2.resizeWindow(image_name_dices, 450, 300)
+        cv2.moveWindow(image_name_dices, 0, 500)
 
         original_image = cv2.imread('src\\Photos\\' + header + str(i + 1) + ender + '.jpg', cv2.IMREAD_COLOR)
         original_image = rescale_frame(original_image, 25)
         gray_image = cv2.cvtColor(original_image, cv2.COLOR_BGR2GRAY)
+        # looking for dots
         blurred_image = cv2.GaussianBlur(gray_image, (15, 15), 0)
         thresh_image = cv2.adaptiveThreshold(blurred_image, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY_INV, 11, 1)
         kernel = np.ones((5, 5), np.uint8)
         eroded_image = cv2.erode(thresh_image, kernel, iterations=1)
         dilated_image = cv2.dilate(eroded_image, kernel, iterations=1)
         contours, hierarchy = cv2.findContours(dilated_image, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+        # looking for cubes edges
+        blurred_image = cv2.GaussianBlur(gray_image, (15, 15), 0)
+        dilated_image2 = cv2.dilate(blurred_image, kernel, iterations=1)
+        canny = cv2.Canny(dilated_image2, 80, 200)
+        _, thresh_image2 = cv2.threshold(canny, 100, 255, cv2.THRESH_BINARY)
         try:
             dots_coordinates = []
             for j in range(len(contours)):
@@ -90,7 +101,8 @@ def main():
                             cv2.drawContours(original_image, contours, hierarchy[0][j][3], (255, 0, 0), 2)
             print(dots_coordinates)
             cv2.imshow(image_name, original_image)
-            cv2.imshow(image_name_original, thresh_image)
+            cv2.imshow(image_name_dots, thresh_image)
+            cv2.imshow(image_name_dices, thresh_image2)
         except:
             print("error, something went wrong :/")
             i = i+1
