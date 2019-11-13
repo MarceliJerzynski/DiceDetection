@@ -9,6 +9,13 @@ header = '('
 ender = ')'
 
 
+def rescale_frame(frame, percent=75):
+    width = int(frame.shape[1] * percent / 100)
+    height = int(frame.shape[0] * percent / 100)
+    dim = (width, height)
+    return cv2.resize(frame, dim, interpolation=cv2.INTER_AREA)
+
+
 def adjust_gamma(image, gamma):
     inv_gamma = 1.0 / gamma
     table = np.array([((i / 255.0) ** inv_gamma) * 255
@@ -51,23 +58,24 @@ def main():
         cv2.moveWindow(image_name_original, 0, 0)
 
         original_image = cv2.imread('src\\Photos\\' + header + str(i + 1) + ender + '.jpg', cv2.IMREAD_COLOR)
+        original_image = rescale_frame(original_image, 25)
         gray_image = cv2.cvtColor(original_image, cv2.COLOR_BGR2GRAY)
         blurred_image = cv2.GaussianBlur(gray_image, (15, 15), 0)
         thresh_image = cv2.adaptiveThreshold(blurred_image, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY_INV, 11, 1)
         kernel = np.ones((5, 5), np.uint8)
         eroded_image = cv2.erode(thresh_image, kernel, iterations=1)
-        dilated_image = cv2.dilate(eroded_image, kernel, iterations=4)
+        dilated_image = cv2.dilate(eroded_image, kernel, iterations=1)
         contours, hierarchy = cv2.findContours(dilated_image, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
         try:
             dots_coordinates = []
             for j in range(len(contours)):
                 area = cv2.contourArea(contours[j])
                 perimeter = cv2.arcLength(contours[j], True)
-                contours[j] = scale_contour(contours[j], 1.15)
+                contours[j] = scale_contour(contours[j], 1.1)
                 if perimeter == 0:
                     break
                 circularity = 4 * math.pi * (area / (perimeter * perimeter))
-                if 0.6 < circularity and 1000 < area < 10000:
+                if 0.6 < circularity and 1000 / 16 < area < 10000 / 16:
                     x = []
                     y = []
                     color = []
@@ -76,10 +84,10 @@ def main():
                         y.append(contours[j][k][0][0])
                         color.append(int(gray_image[contours[j][k][0][1], contours[j][k][0][0]]))
                     if int(gray_image[mean(x), mean(y)]) < 150 and mean(color) > 100:
-                        cv2.drawContours(original_image, contours, j, (0, 0, 255), 7)
+                        cv2.drawContours(original_image, contours, j, (0, 0, 255), 3)
                         dots_coordinates.append([mean(x), mean(y)])
                         if hierarchy[0][j][3] >= 0:
-                            cv2.drawContours(original_image, contours, hierarchy[0][j][3], (255, 0, 0), 5)
+                            cv2.drawContours(original_image, contours, hierarchy[0][j][3], (255, 0, 0), 2)
             print(dots_coordinates)
             cv2.imshow(image_name, original_image)
             cv2.imshow(image_name_original, thresh_image)
