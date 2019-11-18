@@ -100,12 +100,14 @@ def main():
                     dice.append(other_coord)
             dices.append(dice)
 
+
+        print(len(dices))
         result = list()
         for dice in dices:
             if dice not in result:
                 result.append(dice)
 
-        results = 6 * [0]
+        results = 20 * [0]
         for dice in result:
             results[len(dice) - 1] += 1
 
