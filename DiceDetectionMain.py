@@ -10,6 +10,10 @@ files = glob('src/Photos/*.jpg')
 number_of_pictures = len(files)
 
 
+def distance(p1, p2):
+    return math.sqrt(((p1[0]-p2[0])**2)+((p1[1]-p2[1])**2))
+
+
 def rescale_frame(frame, percent=75):
     width = int(frame.shape[1] * percent / 100)
     height = int(frame.shape[0] * percent / 100)
@@ -68,45 +72,48 @@ def main():
         eroded_image = cv2.erode(thresh_image, kernel, iterations=1)
         dilated_image = cv2.dilate(eroded_image, kernel, iterations=1)
         contours, hierarchy = cv2.findContours(dilated_image, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
-        try:
-            dots_coordinates = []
-            dots = []
-            for j in range(len(contours)):
-                area = cv2.contourArea(contours[j])
-                perimeter = cv2.arcLength(contours[j], True)
-                contours[j] = scale_contour(contours[j], 1.1)
-                if perimeter == 0:
-                    break
-                circularity = 4 * math.pi * (area / (perimeter * perimeter))
-                if 0.8 < circularity and 1000 / 16 < area < 10000 / 16:
-                    x = []
-                    y = []
-                    color = []
-                    for k in range(len(contours[j])):
-                        x.append(contours[j][k][0][1])
-                        y.append(contours[j][k][0][0])
-                        color.append(int(gray_image[contours[j][k][0][1], contours[j][k][0][0]]))
-                    if int(gray_image[mean(x), mean(y)]) < 150 and mean(color) > 100:
-                        cv2.drawContours(original_image, contours, j, (0, 0, 255), 3)
-                        dots_coordinates.append([mean(x), mean(y)])
-                        dots.append(contours[j])
-                        # if hierarchy[0][j][3] >= 0:
-                        #     cv2.drawContours(original_image, contours, hierarchy[0][j][3], (255, 0, 0), 2)
-            print('This many dots ' + str(len(dots_coordinates)))
-            cv2.imshow(image_name, original_image)
-            cv2.imshow(image_name_dots, thresh_image)
-            dices = len(dots)*[]
-            for o in range(len(dots)):
-                    dices[o].append(dots[o])
-                    for p in range(len(dots)):
-                        if o != p:
-                            dx = dots_coordinates[o][0] - dots_coordinates[p][0]
-                            dy = dots_coordinates[o][1] - dots_coordinates[p][1]
-                            distance = math.sqrt(dx*dx + dy*dy)
-                            if distance < cv2.arcLength(dots[o], True):
-                                dices[o].append(dots[p])
-            for o in range(len(dices)):
-                    print (len(dices[o]))
+        dots_coordinates = []
+        dots = []
+        for j in range(len(contours)):
+            area = cv2.contourArea(contours[j])
+            perimeter = cv2.arcLength(contours[j], True)
+            contours[j] = scale_contour(contours[j], 1.1)
+            if perimeter == 0:
+                break
+            circularity = 4 * math.pi * (area / (perimeter * perimeter))
+            if 0.8 < circularity and 1000 / 16 < area < 10000 / 16:
+                x = []
+                y = []
+                color = []
+                for k in range(len(contours[j])):
+                    x.append(contours[j][k][0][1])
+                    y.append(contours[j][k][0][0])
+                    color.append(int(gray_image[contours[j][k][0][1], contours[j][k][0][0]]))
+                if int(gray_image[mean(x), mean(y)]) < 150 and mean(color) > 100:
+                    cv2.drawContours(original_image, contours, j, (0, 0, 255), 3)
+                    dots_coordinates.append([mean(x), mean(y)])
+                    dots.append(contours[j])
+                    # if hierarchy[0][j][3] >= 0:
+                    #     cv2.drawContours(original_image, contours, hierarchy[0][j][3], (255, 0, 0), 2)
+        cv2.imshow(image_name, original_image)
+        cv2.imshow(image_name_dots, thresh_image)
+
+        dices = list()
+        for coord in dots_coordinates:
+            dice = list()
+            # print('coord: ' + str(coord))
+            for other_coord in dots_coordinates:
+                if distance(coord, other_coord) < 100:
+                    dice.append(other_coord)
+            dices.append(dice)
+
+        result = list()
+        for dice in dices:
+            if dice not in result:
+                result.append(dice)
+        print(len(result))
+        for dice in result:
+            print(len(dice))
 
 
 
@@ -114,10 +121,9 @@ def main():
 
 
 
-        except:
-            print("error, something went wrong :/")
-            i = i+1
-            continue
+            # print("error, something went wrong :/")
+            # i = i+1
+            # continue
         key = cv2.waitKey(0)
         if key == 27:  # ESCAPE
             sys.exit()
