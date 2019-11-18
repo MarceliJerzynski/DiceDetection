@@ -100,8 +100,6 @@ def main():
                     dice.append(other_coord)
             dices.append(dice)
 
-
-        print(len(dices))
         result = list()
         for dice in dices:
             if dice not in result:
