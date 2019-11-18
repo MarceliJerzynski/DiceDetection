@@ -3,10 +3,11 @@ import sys
 import cv2
 import numpy as np
 from statistics import mean
+from glob import glob
 
-amount_of_pictures = 54
-header = '('
-ender = ')'
+
+files = glob('src/Photos/*.jpg')
+number_of_pictures = len(files)
 
 
 def rescale_frame(frame, percent=75):
@@ -39,13 +40,6 @@ def scale_contour(cnt, scale):
 
 def main():
     i = 0
-    thresh = 195
-    # min_threshold = 10  # these values are used to filter our detector.
-    # max_threshold = 100  # they can be tweaked depending on the camera distance, camera angle, ...
-    # min_area = 20  # ... focus, brightness, etc.
-    # min_circularity = 0.3
-    # min_inertia_ratio = 0.5
-
     while True:
         image_name = 'Original image no ' + str(i + 1)
         cv2.namedWindow(image_name, cv2.WINDOW_NORMAL)
@@ -61,8 +55,8 @@ def main():
         cv2.namedWindow(image_name_dices, cv2.WINDOW_NORMAL)
         cv2.resizeWindow(image_name_dices, 450, 300)
         cv2.moveWindow(image_name_dices, 0, 500)
-
-        original_image = cv2.imread('src\\Photos\\' + header + str(i + 1) + ender + '.jpg', cv2.IMREAD_COLOR)
+        original_image = cv2.imread(files[i], cv2.IMREAD_COLOR)
+        print('File ' + files[i])
         original_image = rescale_frame(original_image, 25)
         gray_image = cv2.cvtColor(original_image, cv2.COLOR_BGR2GRAY)
         # looking for dots
@@ -72,11 +66,6 @@ def main():
         eroded_image = cv2.erode(thresh_image, kernel, iterations=1)
         dilated_image = cv2.dilate(eroded_image, kernel, iterations=1)
         contours, hierarchy = cv2.findContours(dilated_image, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
-        # looking for cubes edges
-        blurred_image = cv2.GaussianBlur(gray_image, (15, 15), 0)
-        dilated_image2 = cv2.dilate(blurred_image, kernel, iterations=1)
-        canny = cv2.Canny(dilated_image2, 80, 200)
-        _, thresh_image2 = cv2.threshold(canny, 100, 255, cv2.THRESH_BINARY)
         try:
             dots_coordinates = []
             for j in range(len(contours)):
@@ -86,7 +75,7 @@ def main():
                 if perimeter == 0:
                     break
                 circularity = 4 * math.pi * (area / (perimeter * perimeter))
-                if 0.6 < circularity and 1000 / 16 < area < 10000 / 16:
+                if 0.8 < circularity and 1000 / 16 < area < 10000 / 16:
                     x = []
                     y = []
                     color = []
@@ -99,10 +88,9 @@ def main():
                         dots_coordinates.append([mean(x), mean(y)])
                         if hierarchy[0][j][3] >= 0:
                             cv2.drawContours(original_image, contours, hierarchy[0][j][3], (255, 0, 0), 2)
-            print(dots_coordinates)
+            print('This many dots ' + str(len(dots_coordinates)))
             cv2.imshow(image_name, original_image)
             cv2.imshow(image_name_dots, thresh_image)
-            cv2.imshow(image_name_dices, thresh_image2)
         except:
             print("error, something went wrong :/")
             i = i+1
@@ -111,7 +99,7 @@ def main():
         if key == 27:  # ESCAPE
             sys.exit()
         elif key == 100:  # D
-            if i < amount_of_pictures - 1:
+            if i < number_of_pictures - 1:
                 i = i + 1
             else:
                 i = 0
@@ -119,7 +107,7 @@ def main():
             if i != 0:
                 i = i - 1
             else:
-                i = amount_of_pictures - 1
+                i = number_of_pictures - 1
         elif key == 101:  # E
             thresh = thresh + 5
             print('thresh = ', thresh)
