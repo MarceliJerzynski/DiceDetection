@@ -132,6 +132,7 @@ def main():
         to_show = cv2.putText(to_show, "liczba szostek: " + str(results[5]), org, font, font_scale, color, thickness, cv2.LINE_AA)
 
         cv2.imshow(image_name, to_show)
+        cv2.imwrite('out/' + str("{:02d}".format(i + 1)) + '.jpg', to_show)
         key = cv2.waitKey(0)
         if key == 27:  # ESCAPE
             sys.exit()
@@ -165,3 +166,4 @@ def main():
 
 if __name__ == '__main__':
     main()
+
