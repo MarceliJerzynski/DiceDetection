@@ -44,7 +44,7 @@ def scale_contour(cnt, scale):
 def main():
     i = 0
     while True:
-        image_name = 'Original image no ' + str(i + 1)
+        image_name = 'Image no ' + str(i + 1)
         cv2.namedWindow(image_name, cv2.WINDOW_NORMAL)
         cv2.resizeWindow(image_name, 900, 600)
         cv2.moveWindow(image_name, 600, 100)
@@ -52,10 +52,12 @@ def main():
         original_image = cv2.imread(files[i], cv2.IMREAD_COLOR)
         print('File ' + files[i])
         to_show = original_image.copy()
+        to_show_before = to_show.copy()
         original_image = rescale_frame(original_image, 25)
         if original_image.shape[0] > original_image.shape[1]:
             original_image = cv2.rotate(original_image, cv2.ROTATE_90_CLOCKWISE)
             to_show = cv2.rotate(to_show, cv2.ROTATE_90_CLOCKWISE)
+            to_show_before = cv2.rotate(to_show_before, cv2.ROTATE_90_CLOCKWISE)
         gray_image = cv2.cvtColor(original_image, cv2.COLOR_BGR2GRAY)
         # looking for dots
         blurred_image = cv2.GaussianBlur(gray_image, (15, 15), 0)
@@ -131,36 +133,25 @@ def main():
         org = (10, 220 * 4 + 20)
         to_show = cv2.putText(to_show, "liczba szostek: " + str(results[5]), org, font, font_scale, color, thickness, cv2.LINE_AA)
 
-        cv2.imshow(image_name, to_show)
+        cv2.imshow(image_name, to_show_before)
         cv2.imwrite('out/' + str("{:02d}".format(i + 1)) + '.jpg', to_show)
         key = cv2.waitKey(0)
+
+        if key == 13 or key == 32:  # enter or space
+            cv2.imshow(image_name, to_show)
+            key = cv2.waitKey(0)
         if key == 27:  # ESCAPE
             sys.exit()
-        elif key == 100:  # D
+        elif key == 100:  # d
             if i < number_of_pictures - 1:
                 i = i + 1
             else:
                 i = 0
-        elif key == 97:  # A
+        elif key == 97:  # a
             if i != 0:
                 i = i - 1
             else:
                 i = number_of_pictures - 1
-        elif key == 101:  # E
-            thresh = thresh + 5
-            print('thresh = ', thresh)
-        elif key == 113:  # Q
-            thresh = thresh - 5
-            print('thresh = ', thresh)
-        elif key == 49:  # 1
-            print(i, " : Good")
-        elif key == 50:  # 2
-            print(i, " : I cant see dice contour")
-        elif key == 51:  # 3
-            print(i, " : I can see to many pips")
-        elif key == 52:  # 4
-            print(i, " : Bad photo")
-
         cv2.destroyAllWindows()
 
 
