@@ -82,7 +82,10 @@ def main():
                     y.append(contours[j][k][0][0])
                     color.append(int(gray_image[contours[j][k][0][1], contours[j][k][0][0]]))
                 if int(gray_image[mean(x), mean(y)]) < 150 and mean(color) > 100:
-                    cv2.drawContours(original_image, contours, j, (0, 0, 255), 3)
+                    for contour in contours[j]:
+                        contour[:, 0] = contour[:, 0] * 4
+                        contour[:, 1] = contour[:, 1] * 4
+                    cv2.drawContours(to_show, contours, j, (0, 0, 255), 12)
                     dots_coordinates.append([mean(x), mean(y)])
                     dots.append(contours[j])
 
@@ -105,7 +108,7 @@ def main():
             results[len(dice) - 1] += 1
 
         font = cv2.FONT_HERSHEY_SIMPLEX
-        fontScale = 0.8 * 4
+        font_scale = 3.2
         color = (0, 0, 255)
         thickness = 8
         alpha = 0.55
@@ -115,21 +118,18 @@ def main():
         cv2.rectangle(to_show, (0, 0), (250 * 4, 230 * 4), (100, 100, 100), -1)
 
         cv2.addWeighted(overlay, 1 - alpha, to_show, alpha, 0, to_show)
-        print(to_show.shape)
         org = (10, 20 * 4 + 20)
-        to_show = cv2.putText(to_show, "liczba jedynek: " + str(results[0]), org, font, fontScale, color, thickness, cv2.LINE_AA)
+        to_show = cv2.putText(to_show, "liczba jedynek: " + str(results[0]), org, font, font_scale, color, thickness, cv2.LINE_AA)
         org = (10, 60 * 4 + 20)
-        to_show = cv2.putText(to_show, "liczba dwojek: " + str(results[1]), org, font, fontScale, color, thickness, cv2.LINE_AA)
+        to_show = cv2.putText(to_show, "liczba dwojek: " + str(results[1]), org, font, font_scale, color, thickness, cv2.LINE_AA)
         org = (10, 100 * 4 + 20)
-        to_show = cv2.putText(to_show, "liczba trojek: " + str(results[2]), org, font, fontScale, color, thickness, cv2.LINE_AA)
+        to_show = cv2.putText(to_show, "liczba trojek: " + str(results[2]), org, font, font_scale, color, thickness, cv2.LINE_AA)
         org = (10, 140 * 4 + 20)
-        to_show = cv2.putText(to_show, "liczba czworek: " + str(results[3]), org, font, fontScale, color, thickness, cv2.LINE_AA)
+        to_show = cv2.putText(to_show, "liczba czworek: " + str(results[3]), org, font, font_scale, color, thickness, cv2.LINE_AA)
         org = (10, 180 * 4 + 20)
-        to_show = cv2.putText(to_show, "liczba piatek: " + str(results[4]), org, font, fontScale, color, thickness, cv2.LINE_AA)
+        to_show = cv2.putText(to_show, "liczba piatek: " + str(results[4]), org, font, font_scale, color, thickness, cv2.LINE_AA)
         org = (10, 220 * 4 + 20)
-        to_show = cv2.putText(to_show, "liczba szostek: " + str(results[5]), org, font, fontScale, color, thickness, cv2.LINE_AA)
-
-        print(to_show.shape)
+        to_show = cv2.putText(to_show, "liczba szostek: " + str(results[5]), org, font, font_scale, color, thickness, cv2.LINE_AA)
 
         cv2.imshow(image_name, to_show)
         key = cv2.waitKey(0)
