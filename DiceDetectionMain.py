@@ -51,10 +51,12 @@ def main():
         cv2.resizeWindow(image_name_dots, 450, 300)
         cv2.moveWindow(image_name_dots, 0, 0)
 
-        image_name_dices = 'Processed image (dices) no ' + str(i + 1)
-        cv2.namedWindow(image_name_dices, cv2.WINDOW_NORMAL)
-        cv2.resizeWindow(image_name_dices, 450, 300)
-        cv2.moveWindow(image_name_dices, 0, 500)
+        # image_name_dices = 'Processed image (dices) no ' + str(i + 1)
+        # cv2.namedWindow(image_name_dices, cv2.WINDOW_NORMAL)
+        # cv2.resizeWindow(image_name_dices, 450, 300)
+        # cv2.moveWindow(image_name_dices, 0, 500)
+
+
         original_image = cv2.imread(files[i], cv2.IMREAD_COLOR)
         print('File ' + files[i])
         original_image = rescale_frame(original_image, 25)
@@ -68,6 +70,7 @@ def main():
         contours, hierarchy = cv2.findContours(dilated_image, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
         try:
             dots_coordinates = []
+            dots = []
             for j in range(len(contours)):
                 area = cv2.contourArea(contours[j])
                 perimeter = cv2.arcLength(contours[j], True)
@@ -86,11 +89,31 @@ def main():
                     if int(gray_image[mean(x), mean(y)]) < 150 and mean(color) > 100:
                         cv2.drawContours(original_image, contours, j, (0, 0, 255), 3)
                         dots_coordinates.append([mean(x), mean(y)])
-                        if hierarchy[0][j][3] >= 0:
-                            cv2.drawContours(original_image, contours, hierarchy[0][j][3], (255, 0, 0), 2)
+                        dots.append(contours[j])
+                        # if hierarchy[0][j][3] >= 0:
+                        #     cv2.drawContours(original_image, contours, hierarchy[0][j][3], (255, 0, 0), 2)
             print('This many dots ' + str(len(dots_coordinates)))
             cv2.imshow(image_name, original_image)
             cv2.imshow(image_name_dots, thresh_image)
+            dices = len(dots)*[]
+            for o in range(len(dots)):
+                    dices[o].append(dots[o])
+                    for p in range(len(dots)):
+                        if o != p:
+                            dx = dots_coordinates[o][0] - dots_coordinates[p][0]
+                            dy = dots_coordinates[o][1] - dots_coordinates[p][1]
+                            distance = math.sqrt(dx*dx + dy*dy)
+                            if distance < cv2.arcLength(dots[o], True):
+                                dices[o].append(dots[p])
+            for o in range(len(dices)):
+                    print (len(dices[o]))
+
+
+
+
+
+
+
         except:
             print("error, something went wrong :/")
             i = i+1
