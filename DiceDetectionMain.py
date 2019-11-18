@@ -5,12 +5,12 @@ import numpy as np
 from statistics import mean
 from glob import glob
 
-
 files = glob('src/Photos/*.jpg')
 number_of_pictures = len(files)
 
+
 def distance(p1, p2):
-    return math.sqrt(((p1[0]-p2[0])**2)+((p1[1]-p2[1])**2))
+    return math.sqrt(((p1[0] - p2[0]) ** 2) + ((p1[1] - p2[1]) ** 2))
 
 
 def rescale_frame(frame, percent=75):
@@ -30,8 +30,8 @@ def adjust_gamma(image, gamma):
 
 def scale_contour(cnt, scale):
     M = cv2.moments(cnt)
-    cx = int(M['m10']/M['m00'])
-    cy = int(M['m01']/M['m00'])
+    cx = int(M['m10'] / M['m00'])
+    cy = int(M['m01'] / M['m00'])
 
     cnt_norm = cnt - [cx, cy]
     cnt_scaled = cnt_norm * scale
@@ -51,7 +51,11 @@ def main():
 
         original_image = cv2.imread(files[i], cv2.IMREAD_COLOR)
         print('File ' + files[i])
+        to_show = original_image.copy()
         original_image = rescale_frame(original_image, 25)
+        if original_image.shape[0] > original_image.shape[1]:
+            original_image = cv2.rotate(original_image, cv2.ROTATE_90_CLOCKWISE)
+            to_show = cv2.rotate(to_show, cv2.ROTATE_90_CLOCKWISE)
         gray_image = cv2.cvtColor(original_image, cv2.COLOR_BGR2GRAY)
         # looking for dots
         blurred_image = cv2.GaussianBlur(gray_image, (15, 15), 0)
@@ -96,29 +100,38 @@ def main():
             if dice not in result:
                 result.append(dice)
 
-        results = 6*[0]
+        results = 6 * [0]
         for dice in result:
-            results[len(dice)-1] += 1
+            results[len(dice) - 1] += 1
 
         font = cv2.FONT_HERSHEY_SIMPLEX
-        fontScale = 0.8
+        fontScale = 0.8 * 4
         color = (0, 0, 255)
-        thickness = 2
+        thickness = 8
+        alpha = 0.55
 
-        org = (10, 20)
-        original_image = cv2.putText( original_image, "liczba jedynek:" + str(results[ 0 ]), org, font, fontScale, color, thickness, cv2.LINE_AA )
-        org = (10, 60)
-        original_image = cv2.putText( original_image, "liczba dwojek:" + str( results[ 1 ] ), org, font, fontScale, color, thickness, cv2.LINE_AA )
-        org = (10, 100)
-        original_image = cv2.putText( original_image, "liczba trojek:" + str( results[ 2 ] ), org, font, fontScale, color, thickness, cv2.LINE_AA )
-        org = (10, 140)
-        original_image = cv2.putText( original_image, "liczba czworek:" + str( results[ 3 ] ), org, font, fontScale, color, thickness, cv2.LINE_AA )
-        org = (10, 180)
-        original_image = cv2.putText( original_image, "liczba piatek:" + str( results[ 4 ] ), org, font, fontScale, color, thickness, cv2.LINE_AA )
-        org = (10, 220)
-        original_image = cv2.putText( original_image, "liczba szostek:" + str( results[ 5 ] ), org, font, fontScale, color, thickness, cv2.LINE_AA )
+        overlay = to_show.copy()
 
-        cv2.imshow( image_name, original_image )
+        cv2.rectangle(to_show, (0, 0), (250 * 4, 230 * 4), (100, 100, 100), -1)
+
+        cv2.addWeighted(overlay, 1 - alpha, to_show, alpha, 0, to_show)
+        print(to_show.shape)
+        org = (10, 20 * 4 + 20)
+        to_show = cv2.putText(to_show, "liczba jedynek: " + str(results[0]), org, font, fontScale, color, thickness, cv2.LINE_AA)
+        org = (10, 60 * 4 + 20)
+        to_show = cv2.putText(to_show, "liczba dwojek: " + str(results[1]), org, font, fontScale, color, thickness, cv2.LINE_AA)
+        org = (10, 100 * 4 + 20)
+        to_show = cv2.putText(to_show, "liczba trojek: " + str(results[2]), org, font, fontScale, color, thickness, cv2.LINE_AA)
+        org = (10, 140 * 4 + 20)
+        to_show = cv2.putText(to_show, "liczba czworek: " + str(results[3]), org, font, fontScale, color, thickness, cv2.LINE_AA)
+        org = (10, 180 * 4 + 20)
+        to_show = cv2.putText(to_show, "liczba piatek: " + str(results[4]), org, font, fontScale, color, thickness, cv2.LINE_AA)
+        org = (10, 220 * 4 + 20)
+        to_show = cv2.putText(to_show, "liczba szostek: " + str(results[5]), org, font, fontScale, color, thickness, cv2.LINE_AA)
+
+        print(to_show.shape)
+
+        cv2.imshow(image_name, to_show)
         key = cv2.waitKey(0)
         if key == 27:  # ESCAPE
             sys.exit()
@@ -138,13 +151,13 @@ def main():
         elif key == 113:  # Q
             thresh = thresh - 5
             print('thresh = ', thresh)
-        elif key == 49: #1
+        elif key == 49:  # 1
             print(i, " : Good")
-        elif key == 50: #2
+        elif key == 50:  # 2
             print(i, " : I cant see dice contour")
-        elif key == 51: #3
+        elif key == 51:  # 3
             print(i, " : I can see to many pips")
-        elif key == 52: #4
+        elif key == 52:  # 4
             print(i, " : Bad photo")
 
         cv2.destroyAllWindows()
