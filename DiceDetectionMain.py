@@ -9,7 +9,6 @@ from glob import glob
 files = glob('src/Photos/*.jpg')
 number_of_pictures = len(files)
 
-
 def distance(p1, p2):
     return math.sqrt(((p1[0]-p2[0])**2)+((p1[1]-p2[1])**2))
 
@@ -50,17 +49,6 @@ def main():
         cv2.resizeWindow(image_name, 900, 600)
         cv2.moveWindow(image_name, 600, 100)
 
-        image_name_dots = 'Processed image (dots) no ' + str(i + 1)
-        cv2.namedWindow(image_name_dots, cv2.WINDOW_NORMAL)
-        cv2.resizeWindow(image_name_dots, 450, 300)
-        cv2.moveWindow(image_name_dots, 0, 0)
-
-        # image_name_dices = 'Processed image (dices) no ' + str(i + 1)
-        # cv2.namedWindow(image_name_dices, cv2.WINDOW_NORMAL)
-        # cv2.resizeWindow(image_name_dices, 450, 300)
-        # cv2.moveWindow(image_name_dices, 0, 500)
-
-
         original_image = cv2.imread(files[i], cv2.IMREAD_COLOR)
         print('File ' + files[i])
         original_image = rescale_frame(original_image, 25)
@@ -93,10 +81,6 @@ def main():
                     cv2.drawContours(original_image, contours, j, (0, 0, 255), 3)
                     dots_coordinates.append([mean(x), mean(y)])
                     dots.append(contours[j])
-                    # if hierarchy[0][j][3] >= 0:
-                    #     cv2.drawContours(original_image, contours, hierarchy[0][j][3], (255, 0, 0), 2)
-        cv2.imshow(image_name, original_image)
-        cv2.imshow(image_name_dots, thresh_image)
 
         dices = list()
         for coord in dots_coordinates:
@@ -111,19 +95,30 @@ def main():
         for dice in dices:
             if dice not in result:
                 result.append(dice)
-        print(len(result))
+
+        results = 6*[0]
         for dice in result:
-            print(len(dice))
+            results[len(dice)-1] += 1
 
+        font = cv2.FONT_HERSHEY_SIMPLEX
+        fontScale = 0.8
+        color = (0, 0, 255)
+        thickness = 2
 
+        org = (10, 20)
+        original_image = cv2.putText( original_image, "liczba jedynek:" + str(results[ 0 ]), org, font, fontScale, color, thickness, cv2.LINE_AA )
+        org = (10, 60)
+        original_image = cv2.putText( original_image, "liczba dwojek:" + str( results[ 1 ] ), org, font, fontScale, color, thickness, cv2.LINE_AA )
+        org = (10, 100)
+        original_image = cv2.putText( original_image, "liczba trojek:" + str( results[ 2 ] ), org, font, fontScale, color, thickness, cv2.LINE_AA )
+        org = (10, 140)
+        original_image = cv2.putText( original_image, "liczba czworek:" + str( results[ 3 ] ), org, font, fontScale, color, thickness, cv2.LINE_AA )
+        org = (10, 180)
+        original_image = cv2.putText( original_image, "liczba piatek:" + str( results[ 4 ] ), org, font, fontScale, color, thickness, cv2.LINE_AA )
+        org = (10, 220)
+        original_image = cv2.putText( original_image, "liczba szostek:" + str( results[ 5 ] ), org, font, fontScale, color, thickness, cv2.LINE_AA )
 
-
-
-
-
-            # print("error, something went wrong :/")
-            # i = i+1
-            # continue
+        cv2.imshow( image_name, original_image )
         key = cv2.waitKey(0)
         if key == 27:  # ESCAPE
             sys.exit()
